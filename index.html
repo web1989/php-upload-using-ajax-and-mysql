@@ -22,12 +22,12 @@
      }
       #addFiles {
         height: 200px;
-        border: 2px dashed #ccc;
-        line-height: 200px;
-        text-align: center;
-        font-size: 20px;
-        background: #f9f9f9;
-        margin-bottom: 15px;
+    border: 2px dashed #7ac4bf;
+    line-height: 200px;
+    text-align: center;
+    font-size: 20px;
+    background: #fbffff;
+    margin-bottom: 15px;
       }
 
       .drag_over {
@@ -104,7 +104,11 @@ transform: scale(1.05);
           </div>
         </div>
       </nav>
-     
+      <div  ></div>
+      <div id="error-messages" class="alert alert-warning alert-dismissible fade show d-none" role="alert">
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        
+    </div>
   
     <div id="imagem-lista" class="row">
         
@@ -116,7 +120,17 @@ transform: scale(1.05);
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
 
-
+    <div class="position-fixed bottom-0 end-0 p-3" style="z-index: 5">
+        <div id="customToast" class="toast hide" role="alert" aria-live="assertive" aria-atomic="true">
+          <div class="toast-header">
+            <strong class="me-auto">Sucesso</strong>
+            <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+          </div>
+          <div class="toast-body">
+            Imagens excluídas com sucesso.
+          </div>
+        </div>
+      </div>
     <script>
      $(document).ready(function() {
     $("#addFiles").on("dragover", function() {
@@ -217,7 +231,9 @@ transform: scale(1.05);
             data: { id: id },
             success: function(response) {
                 if (response === "success") {
-                    alert("Imagem excluída com sucesso.");
+                   // alert("Imagem excluída com sucesso.");
+                    var customToast = new bootstrap.Toast(document.getElementById('customToast'));
+                    customToast.show();
                     listarImagens();
                 } else {
                     alert("Ocorreu um erro ao excluir a imagem.");
@@ -249,6 +265,7 @@ transform: scale(1.05);
             excluirImagens(idsParaExcluir);
         }
     });
+    
 
     function excluirImagens(ids) {
         $.ajax({
@@ -257,7 +274,9 @@ transform: scale(1.05);
             data: { ids: ids },
             success: function(response) {
                 if (response === "success") {
-                    alert("Imagens excluídas com sucesso.");
+                   // alert("Imagens excluídas com sucesso.");
+                   var customToast = new bootstrap.Toast(document.getElementById('customToast'));
+                    customToast.show();
                     listarImagens();
                 } else {
                     alert("Ocorreu um erro ao excluir as imagens.");
@@ -267,9 +286,47 @@ transform: scale(1.05);
     }
 
     listarImagens();
-});
+
+    function file_explorer() {
+    document.getElementById("selectfile").click();
+    document.getElementById("selectfile").onchange = function() {
+        var files = document.getElementById("selectfile").files;
+        var formData = new FormData();
+        var errorMessages = []; // Array para armazenar mensagens de erro
+
+        for (var i = 0; i < files.length; i++) {
+            var file = files[i];
+            var fileName = file.name;
+            var fileExt = fileName.split('.').pop().toLowerCase();
+
+            // Verifique se a extensão do arquivo está na lista de formatos permitidos
+            if (['jpg', 'jpeg', 'png', 'svg'].indexOf(fileExt) !== -1) {
+                formData.append("file[]", file);
+            } else {
+                errorMessages.push("Arquivo não suportado: " + fileName + "<button type='button' class='btn-close' data-bs-dismiss='alert' aria-label='Close'></button>");
+            }
+        }
+
+        // Exiba as mensagens de erro no elemento 'error-messages'
+        var errorMessagesDiv = document.getElementById("error-messages");
+        if (errorMessages.length > 0) {
+            errorMessagesDiv.innerHTML = errorMessages.join("<br>");
+            errorMessagesDiv.classList.remove("d-none");
+            errorMessagesDiv.classList.add("d-block");
+        } else {
+            errorMessagesDiv.classList.remove("d-block");
+            errorMessagesDiv.classList.add("d-none");
+        }
+
+        uploadFormData(formData);
+    };
+}
+
+}); 
+
 
     </script>
+ 
 
  
   </body>
