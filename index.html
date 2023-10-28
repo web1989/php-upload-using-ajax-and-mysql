@@ -76,34 +76,29 @@ transform: scale(1.05);
 } </style>
 
 <div class="container">
-    <div class="loading d-none"><img src="load.gif" alt="" /></div>
+    <div class="loading d-none"><div class="spinner-border text-light" role="status">
+        <span class="visually-hidden">Loading...</span>
+      </div></div>
     <div id="addFiles">
       Arraste e solte aqui ou 
       <a class="btn btn-primary rounded">selecione arquivo(s)</a>
       <input type="file" class="d-none" id="selectfile" multiple>
     </div>
-    <nav class="navbar navbar-expand-lg bg-body-tertiary mb-3">
-        <div class="container-fluid"> 
-          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
-            <span class="navbar-toggler-icon"></span>
-          </button>
-          <div class="collapse navbar-collapse" id="navbarSupportedContent">
-            <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-              <li class="nav-item">
-                <input class="form-check-input" type="checkbox" id="selecionarTodos">
-                <label class="form-check-label" for="selecionarTodos">
-                    Selecionar Todos
-                </label>
-              </li>
-              
-            </ul>
-            <div class="d-flex" role="search">
-                <button id="excluirSelecionados" class="btn btn-danger">Excluir Selecionados</button>
-            </div>
-          </div>
+    <nav class="hstack gap-3 navbar navbar-expand-lg bg-body-tertiary mb-3">
+        <ul class="navbar-nav me-auto p-2">
+            <li class="nav-item">
+              <input class="form-check-input" type="checkbox" id="selecionarTodos">
+              <label class="form-check-label" for="selecionarTodos">
+                  Selecionar Todos
+              </label>
+            </li>
+            
+          </ul>
+         <div class="p-2"><button id="excluirSelecionados" class="btn btn-danger">Excluir Selecionados</button>
         </div>
       </nav>
-      <div  ></div>
+     
+      
       <div id="error-messages" class="alert alert-warning alert-dismissible fade show d-none" role="alert">
         <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         
@@ -201,8 +196,8 @@ transform: scale(1.05);
                     item += '<div class="card-header"><input type="checkbox" class="selecionar-imagem mx-1"  id="delete-' + imagem.id + '">Selecionar</div>';
                     item += '</label>';
                     item += '<div class="card-body">';
-                    item += '<div class="position-relative h-140px"><img src="uploads/' + imagem.file + '" class="card-img-top mb-2 img-fit h-140px"></div>';
-                    item += '<p class="card-title">'+ imagem.name +'</p>';
+                    item += '<div class="position-relative h-140px mb-2"><img src="uploads/' + imagem.file + '" class="card-img-top img-fit h-140px"></div>';
+                    item += '<p class="card-title text-truncate">'+ imagem.name +'</p>';
                     item += '<a href="#" data-id="' + imagem.id + '" class="deletar btn btn-danger btn-sm w-100">Excluir</a>';
                     item += '</div></div></div>';
                     lista.append(item);
