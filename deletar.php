@@ -1,4 +1,5 @@
 <?php
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (isset($_POST['id'])) {
         // Exclusão individual
@@ -41,27 +42,39 @@ function excluirImagem($id) {
         die("Conexão falhou: " . $conexao->connect_error);
     }
 
-    $selecionar_arquivo = "SELECT file FROM imagens WHERE id = $id";
-    $resultado = $conexao->query($selecionar_arquivo);
+    // Use uma declaração preparada
+    $excluirStmt = $conexao->prepare("SELECT file FROM imagens WHERE id = ?");
+    $excluirStmt->bind_param("i", $id);
+    $excluirStmt->execute();
+    $excluirStmt->store_result();
 
-    if ($resultado->num_rows > 0) {
-        $row = $resultado->fetch_assoc();
-        $arquivo_nome = $row['file'];
+    if ($excluirStmt->num_rows > 0) {
+        $excluirStmt->bind_result($arquivo_nome);
+        $excluirStmt->fetch();
 
-        $deletar = "DELETE FROM imagens WHERE id = $id";
-        if ($conexao->query($deletar) === TRUE) {
+        // Use outra declaração preparada para excluir o registro
+        $deletarStmt = $conexao->prepare("DELETE FROM imagens WHERE id = ?");
+        $deletarStmt->bind_param("i", $id);
+
+        if ($deletarStmt->execute()) {
             // Exclua o arquivo físico
             $caminho_arquivo = 'uploads/' . $arquivo_nome;
             if (file_exists($caminho_arquivo)) {
                 unlink($caminho_arquivo);
             }
 
+            $deletarStmt->close();
+            $excluirStmt->close();
             $conexao->close();
             return "success"; // Exclusão bem-sucedida
         } else {
-            return "Erro: " . $deletar . "<br>" . $conexao->error; // Mensagem de erro
+            $deletarStmt->close();
+            $excluirStmt->close();
+            $conexao->close();
+            return "Erro ao excluir o registro: " . $conexao->error; // Mensagem de erro
         }
     } else {
+        $excluirStmt->close();
         $conexao->close();
         return "Imagem não encontrada."; // Mensagem de erro
     }

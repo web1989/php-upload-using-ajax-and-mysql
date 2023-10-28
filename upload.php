@@ -1,4 +1,5 @@
 <?php
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (isset($_FILES['file'])) {
         $conexao = new mysqli("localhost", "root", "root", "imagens");
@@ -14,6 +15,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $formatos_permitidos = array('jpg', 'jpeg', 'png', 'svg');
         $erros_nao_permitidos = array();
 
+        // Preparar uma declaração
+        $inserir = $conexao->prepare("INSERT INTO imagens (file, name) VALUES (?, ?)");
+
         for ($i = 0; $i < $count; $i++) {
             if ($arquivos['error'][$i] === 0) {
                 $arquivo_nome = $arquivos['name'][$i];
@@ -21,16 +25,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
                 // Verifique se a extensão do arquivo está na lista de formatos permitidos
                 if (in_array(strtolower($arquivo_extensao), $formatos_permitidos)) {
-                    $id_unico = uniqid(); // Gere um ID único
+                    $id_unico = uniqid();
                     $novo_nome_arquivo = $id_unico . '.' . $arquivo_extensao;
                     $caminho_arquivo = 'uploads/' . $novo_nome_arquivo;
 
                     if (move_uploaded_file($arquivos['tmp_name'][$i], $caminho_arquivo)) {
-                        // Use o nome original do arquivo (sem a extensão) como descrição no banco de dados
                         $nome_original_sem_extensao = pathinfo($arquivo_nome, PATHINFO_FILENAME);
 
-                        $inserir = "INSERT INTO imagens (file, name) VALUES ('$novo_nome_arquivo', '$nome_original_sem_extensao')";
-                        if ($conexao->query($inserir) === TRUE) {
+                        // Vincular parâmetros à declaração
+                        $inserir->bind_param("ss", $novo_nome_arquivo, $nome_original_sem_extensao);
+
+                        if ($inserir->execute()) {
                             $sucessos++;
                         } else {
                             $erros++;
@@ -46,6 +51,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $erros++;
             }
         }
+
+        $inserir->close();
 
         if ($sucessos > 0) {
             die("Total de imagens enviadas com sucesso: " . $sucessos);
