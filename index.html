@@ -79,9 +79,8 @@ transform: scale(1.05);
     <div class="loading d-none"><img src="load.gif" alt="" /></div>
     <div id="addFiles">
       Arraste e solte aqui ou 
-      <a class="btn btn-primary rounded">
-       selecione arquivo(s)
-      </a>
+      <a class="btn btn-primary rounded">selecione arquivo(s)</a>
+      <input type="file" class="d-none" id="selectfile" multiple>
     </div>
     <nav class="navbar navbar-expand-lg bg-body-tertiary mb-3">
         <div class="container-fluid"> 
@@ -110,27 +109,22 @@ transform: scale(1.05);
         
     </div>
   
-    <div id="imagem-lista" class="row">
-        
-    </div>
- 
-    <input type="file" class="d-none" id="selectfile" multiple>
-
+    <div id="imagem-lista" class="row">        
+    </div> 
+     
   </div>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
 
     <div class="position-fixed bottom-0 end-0 p-3" style="z-index: 5">
-        <div id="customToast" class="toast hide" role="alert" aria-live="assertive" aria-atomic="true">
-          <div class="toast-header">
-            <strong class="me-auto">Sucesso</strong>
-            <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
-          </div>
-          <div class="toast-body">
-            Imagens excluídas com sucesso.
-          </div>
+        <div id="customToast" class="toast text-bg-success border-0 align-items-center hide" role="alert" aria-live="assertive" aria-atomic="true">  
+          <div class="d-flex">      
+          <div class="toast-body">Imagens excluídas com sucesso.</div>
+          <button type="button" class="btn-close me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
         </div>
       </div>
+    </div>
+
     <script>
      $(document).ready(function() {
     $("#addFiles").on("dragover", function() {
