@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Drag and drop multiple file upload using PHP/AJAX/MYSQL</title>    
+    <link href="https://fonts.googleapis.com/css?family=Montserrat" rel="stylesheet" type="text/css" />
+     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
+
+    <style>
+      .PHPGangMessage a,
+      .subbase a {
+        color: blue;
+      }
+    </style>
+  </head>
+  <body>
+   
+    <style>
+     body{
+        font-family: Montserrat, sans-serif;
+     }
+      #addFiles {
+        height: 200px;
+        border: 2px dashed #ccc;
+        line-height: 200px;
+        text-align: center;
+        font-size: 20px;
+        background: #f9f9f9;
+        margin-bottom: 15px;
+      }
+
+      .drag_over {
+        color: #000;
+        border-color: #000;
+      }
+  
+    
+      /* Absolute Center Spinner */
+      .loading {
+        position: fixed;
+        z-index: 999;
+        height: 2em;
+        width: 2em;
+        overflow: visible;
+        margin: auto;
+        top: 0;
+        left: 0;
+        bottom: 0;
+        right: 0;
+      }
+
+      /* Transparent Overlay */
+      .loading:before {
+        content: "";
+        display: block;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.3);
+      }
+      .img-fit {
+    max-height: 100%;
+    width: 100%;
+    object-fit: cover;
+}
+.h-140px {
+    height: 140px;
+    -webkit-transition: all 0.5s ease;
+    transition: all 0.5s ease;
+}
+.h-140px:hover{
+transform: scale(1.05);
+} </style>
+
+<div class="container">
+    <div class="loading d-none"><img src="load.gif" alt="" /></div>
+    <div id="addFiles">
+      Arraste e solte aqui ou 
+      <a class="btn btn-primary rounded">
+       selecione arquivo(s)
+      </a>
+    </div>
+    <nav class="navbar navbar-expand-lg bg-body-tertiary mb-3">
+        <div class="container-fluid"> 
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+          </button>
+          <div class="collapse navbar-collapse" id="navbarSupportedContent">
+            <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+              <li class="nav-item">
+                <input class="form-check-input" type="checkbox" id="selecionarTodos">
+                <label class="form-check-label" for="selecionarTodos">
+                    Selecionar Todos
+                </label>
+              </li>
+              
+            </ul>
+            <div class="d-flex" role="search">
+                <button id="excluirSelecionados" class="btn btn-danger">Excluir Selecionados</button>
+            </div>
+          </div>
+        </div>
+      </nav>
+     
+  
+    <div id="imagem-lista" class="row">
+        
+    </div>
+ 
+    <input type="file" class="d-none" id="selectfile" multiple>
+
+  </div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
+
+
+    <script>
+     $(document).ready(function() {
+    $("#addFiles").on("dragover", function() {
+        $(this).addClass("drag_over");
+        return false;
+    });
+
+    $("#addFiles").on("dragleave", function() {
+        $(this).removeClass("drag_over");
+        return false;
+    });
+
+    $("#addFiles").on("click", function(e) {
+        file_explorer();
+    });
+
+    $("#addFiles").on("drop", function(e) {
+        e.preventDefault();
+        $(this).removeClass("drag_over");
+        var formData = new FormData();
+        var files = e.originalEvent.dataTransfer.files;
+        for (var i = 0; i < files.length; i++) {
+            formData.append("file[]", files[i]);
+        }
+        uploadFormData(formData);
+    });
+
+    function file_explorer() {
+        document.getElementById("selectfile").click();
+        document.getElementById("selectfile").onchange = function() {
+            files = document.getElementById("selectfile").files;
+            var formData = new FormData();
+
+            for (var i = 0; i < files.length; i++) {
+                formData.append("file[]", files[i]);
+            }
+            uploadFormData(formData);
+        };
+    }
+
+    function uploadFormData(form_data) {
+        $(".loading")
+            .removeClass("d-none")
+            .addClass("d-block");
+        $.ajax({
+            url: "upload.php",
+            method: "POST",
+            data: form_data,
+            contentType: false,
+            cache: false,
+            processData: false,
+            success: function(data) {
+                $(".loading")
+                    .removeClass("d-block")
+                    .addClass("d-none");
+                listarImagens();
+            }
+        });
+    }
+
+    function listarImagens() {
+        $.ajax({
+            type: "GET",
+            url: "listar.php",
+            success: function(data) {
+                var imagens = JSON.parse(data);
+                var lista = $("#imagem-lista");
+                lista.empty();
+
+                imagens.forEach(function(imagem) {
+                    var item = '<div class="col-lg-2 col-md-2 col-sm-4 col-6 mb-2">';
+                    item += ' <div class="card">';
+                    item += '<label class="form-check-label" for="delete-' + imagem.id + '">';
+                    item += '<div class="card-header"><input type="checkbox" class="selecionar-imagem mx-1"  id="delete-' + imagem.id + '">Selecionar</div>';
+                    item += '</label>';
+                    item += '<div class="card-body">';
+                    item += '<div class="position-relative h-140px"><img src="uploads/' + imagem.file + '" class="card-img-top mb-2 img-fit h-140px"></div>';
+                    item += '<p class="card-title">'+ imagem.name +'</p>';
+                    item += '<a href="#" data-id="' + imagem.id + '" class="deletar btn btn-danger btn-sm w-100">Excluir</a>';
+                    item += '</div></div></div>';
+                    lista.append(item);
+                });
+
+                $(".deletar").click(function() {
+                    var id = $(this).data("id");
+                    if (confirm("Tem certeza de que deseja excluir esta imagem?")) {
+                        excluirImagem(id);
+                    }
+                });
+            }
+        });
+    }
+
+    function excluirImagem(id) {
+        $.ajax({
+            type: "POST",
+            url: "deletar.php",
+            data: { id: id },
+            success: function(response) {
+                if (response === "success") {
+                    alert("Imagem excluída com sucesso.");
+                    listarImagens();
+                } else {
+                    alert("Ocorreu um erro ao excluir a imagem.");
+                    listarImagens();
+                }
+            }
+        });
+    }
+
+    $("#selecionarTodos").change(function() {
+        $(".selecionar-imagem").prop("checked", $(this).prop("checked"));
+    });
+
+    $("#excluirSelecionados").click(function() {
+        var imagensSelecionadas = $(".selecionar-imagem:checked");
+        var idsParaExcluir = [];
+
+        if (imagensSelecionadas.length === 0) {
+            alert("Nenhuma imagem selecionada para exclusão.");
+            return;
+        }
+
+        imagensSelecionadas.each(function() {
+            var id = $(this).closest(".card").find(".deletar").data("id");
+            idsParaExcluir.push(id);
+        });
+
+        if (confirm("Tem certeza de que deseja excluir as imagens selecionadas?")) {
+            excluirImagens(idsParaExcluir);
+        }
+    });
+
+    function excluirImagens(ids) {
+        $.ajax({
+            type: "POST",
+            url: "deletar.php",
+            data: { ids: ids },
+            success: function(response) {
+                if (response === "success") {
+                    alert("Imagens excluídas com sucesso.");
+                    listarImagens();
+                } else {
+                    alert("Ocorreu um erro ao excluir as imagens.");
+                }
+            }
+        });
+    }
+
+    listarImagens();
+});
+
+    </script>
+
+ 
+  </body>
+</html>
